@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gray-50 text-black-primary;
+  }
+
+  html.dark body {
+    @apply bg-black-primary text-white;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  html.dark ::-webkit-scrollbar-thumb {
+    @apply bg-gray-700;
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply absolute -top-10 left-4 z-50 bg-green-primary text-black-primary px-4 py-2 rounded-pill font-body font-semibold;
+    transition: top 200ms;
+  }
+  .skip-link:focus {
+    @apply top-4;
+  }
+}
