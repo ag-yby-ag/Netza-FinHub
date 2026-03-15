@@ -131,10 +131,8 @@ const REPORT_TEMPLATES = [
 ];
 
 export function runSeed() {
-  const ts0 = Date.now();
   // Check if already seeded
   const existingUsers = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
-  console.log('⏱ Seed check users:', Date.now() - ts0, 'ms');
   if (existingUsers.count > 0) {
     console.log('⏭️  Seed already done, skipping');
     return;
