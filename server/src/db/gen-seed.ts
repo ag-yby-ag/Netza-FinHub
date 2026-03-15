@@ -8,10 +8,18 @@ import fs from 'fs';
 import path from 'path';
 import { runMigrations } from './migrations';
 import { runSeed } from './seed';
+import db from './database';
 
 // Generate DB at the standard data path (not /tmp, VERCEL env not set during build)
 runMigrations();
 runSeed();
+
+// Critical: checkpoint WAL and switch to DELETE mode before saving.
+// WAL mode splits data between .db and .db-wal files.
+// We must merge them into a single .db file for portable base64 embedding.
+db.pragma('wal_checkpoint(TRUNCATE)');
+db.pragma('journal_mode = DELETE');
+db.close();
 
 const dbPath = path.join(__dirname, '../../data/netza-finhub.db');
 
