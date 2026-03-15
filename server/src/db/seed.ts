@@ -202,7 +202,7 @@ export function runSeed() {
   console.log('✅ Suppliers seeded');
 
   // 5. Quotes — 200 across 12 months
-  const suppliers = db.prepare('SELECT id, avg_price, category FROM suppliers WHERE status != "blocked"').all() as Array<{id: number; avg_price: number; category: string}>;
+  const suppliers = db.prepare("SELECT id, avg_price, category FROM suppliers WHERE status != 'blocked'").all() as Array<{id: number; avg_price: number; category: string}>;
   const items: Record<string, string[]> = {
     'Tecnologia': ['Notebooks Dell', 'Licenças Microsoft 365', 'Servidores HP', 'Switches Cisco', 'Storage NetApp', 'Antivírus corporativo', 'SaaS CRM', 'ERP módulo financeiro'],
     'Marketing': ['Folder institucional', 'Banner lona 3x2m', 'Campanha digital', 'Produção de vídeo', 'Material gráfico', 'Assessoria de imprensa', 'Social media mensal'],

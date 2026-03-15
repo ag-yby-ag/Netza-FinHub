@@ -136,7 +136,7 @@ Sempre use R$ com formatação brasileira. Seja direto e objetivo. Retorne SOMEN
         { role: 'user', content: context },
       ],
       temperature: 0.6,
-      max_completion_tokens: 1024,
+      max_tokens: 1024,
       top_p: 0.95,
     });
 
