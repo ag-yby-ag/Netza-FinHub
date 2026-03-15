@@ -62,8 +62,11 @@ app.use((err: Error & { code?: string }, req: express.Request, res: express.Resp
 
 // Initialize DB — always run migrations (idempotent schema updates)
 // runSeed checks internally if already seeded and skips if so
+const t0 = Date.now();
 runMigrations();
+console.log('⏱ runMigrations done:', Date.now() - t0, 'ms');
 runSeed();
+console.log('⏱ runSeed done:', Date.now() - t0, 'ms');
 
 // Only listen in non-serverless environments
 if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
