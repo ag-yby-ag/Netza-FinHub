@@ -2,7 +2,8 @@ import Database, { Database as DatabaseType } from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-const DB_DIR = path.join(__dirname, '../../data');
+const IS_SERVERLESS = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+const DB_DIR = IS_SERVERLESS ? '/tmp' : path.join(__dirname, '../../data');
 const DB_PATH = path.join(DB_DIR, 'netza-finhub.db');
 
 if (!fs.existsSync(DB_DIR)) {

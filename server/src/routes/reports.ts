@@ -4,7 +4,8 @@ import fs from 'fs';
 import db from '../db/database';
 import { verifyToken, AuthRequest } from '../middleware/auth';
 
-const EXPORT_DIR = path.join(__dirname, '../../data/exports');
+const IS_SERVERLESS = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+const EXPORT_DIR = IS_SERVERLESS ? '/tmp/exports' : path.join(__dirname, '../../data/exports');
 if (!fs.existsSync(EXPORT_DIR)) fs.mkdirSync(EXPORT_DIR, { recursive: true });
 
 const router = Router();

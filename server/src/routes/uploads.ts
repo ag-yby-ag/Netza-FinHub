@@ -6,7 +6,8 @@ import db from '../db/database';
 import { verifyToken, AuthRequest } from '../middleware/auth';
 import { createNotification } from '../services/notificationService';
 
-const UPLOAD_DIR = path.join(__dirname, '../../data/uploads');
+const IS_SERVERLESS = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+const UPLOAD_DIR = IS_SERVERLESS ? '/tmp/uploads' : path.join(__dirname, '../../data/uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const storage = multer.diskStorage({

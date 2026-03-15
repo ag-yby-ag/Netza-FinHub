@@ -22,7 +22,10 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000'], credentials: true }));
+const allowedOrigins = process.env.VERCEL
+  ? true // allow all origins on Vercel (same-domain requests)
+  : ['http://localhost:5173', 'http://localhost:3000', process.env.FRONTEND_URL].filter(Boolean);
+app.use(cors({ origin: allowedOrigins as cors.CorsOptions['origin'], credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -57,12 +60,15 @@ app.use((err: Error & { code?: string }, req: express.Request, res: express.Resp
   return res.status(500).json({ success: false, error: err.message || 'Erro interno do servidor' });
 });
 
-// Initialize DB and start
+// Initialize DB
 runMigrations();
 runSeed();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Netza FinHub server running on http://localhost:${PORT}`);
-});
+// Only listen in non-serverless environments
+if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Netza FinHub server running on http://localhost:${PORT}`);
+  });
+}
 
 export default app;
