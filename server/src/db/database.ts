@@ -3,11 +3,25 @@ import path from 'path';
 import fs from 'fs';
 
 const IS_SERVERLESS = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
-const DB_DIR = IS_SERVERLESS ? '/tmp' : path.join(__dirname, '../../data');
-const DB_PATH = path.join(DB_DIR, 'netza-finhub.db');
+const TMP_DB = '/tmp/netza-finhub.db';
+const LOCAL_DB_DIR = path.join(__dirname, '../../data');
+const DB_PATH = IS_SERVERLESS ? TMP_DB : path.join(LOCAL_DB_DIR, 'netza-finhub.db');
 
-if (!fs.existsSync(DB_DIR)) {
-  fs.mkdirSync(DB_DIR, { recursive: true });
+if (!IS_SERVERLESS && !fs.existsSync(LOCAL_DB_DIR)) {
+  fs.mkdirSync(LOCAL_DB_DIR, { recursive: true });
+}
+
+// On Vercel cold start: restore pre-built seed DB from bundle (instant vs re-seeding)
+if (IS_SERVERLESS && !fs.existsSync(TMP_DB)) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const b64: string = require('./seed-data');
+    fs.writeFileSync(TMP_DB, Buffer.from(b64, 'base64'));
+    console.log('✅ Pre-built DB restored to /tmp');
+  } catch {
+    // seed-data.js not available (local dev or first deploy) — will seed at runtime
+    console.log('ℹ️  No pre-built DB found, will seed at runtime');
+  }
 }
 
 const db: DatabaseType = new Database(DB_PATH);
@@ -18,3 +32,4 @@ db.pragma('foreign_keys = ON');
 db.pragma('synchronous = NORMAL');
 
 export default db;
+export { IS_SERVERLESS, TMP_DB };

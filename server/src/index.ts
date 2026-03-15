@@ -60,7 +60,8 @@ app.use((err: Error & { code?: string }, req: express.Request, res: express.Resp
   return res.status(500).json({ success: false, error: err.message || 'Erro interno do servidor' });
 });
 
-// Initialize DB
+// Initialize DB — always run migrations (idempotent schema updates)
+// runSeed checks internally if already seeded and skips if so
 runMigrations();
 runSeed();
 

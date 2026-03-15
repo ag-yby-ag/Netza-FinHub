@@ -141,6 +141,9 @@ export function runSeed() {
 
   console.log('🌱 Starting seed...');
 
+  // Wrap everything in a single transaction for ~100x faster bulk inserts
+  const doSeed = db.transaction(() => {
+
   // 1. USERS FIRST
   const passwordHash = bcrypt.hashSync('admin123', 10);
   const viewerHash = bcrypt.hashSync('viewer123', 10);
@@ -320,7 +323,10 @@ export function runSeed() {
   }
   console.log('✅ System settings seeded');
 
-  console.log('🎉 Seed completed successfully!');
+    console.log('🎉 Seed completed successfully!');
+  }); // end transaction
+
+  doSeed();
 }
 
 // Run when executed directly

@@ -6,3 +6,5 @@ dist/
 *.db-wal
 server/data/
 .DS_Store
+.vercel
+server/src/db/seed-data.js
