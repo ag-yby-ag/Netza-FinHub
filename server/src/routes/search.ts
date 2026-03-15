@@ -35,35 +35,46 @@ router.get('/global', (req: AuthRequest, res: Response) => {
 
 // GET /api/search/suppliers
 router.get('/suppliers', (req: AuthRequest, res: Response) => {
-  const {
-    q = '', category, status, risk_level,
-    rating_min, price_min, price_max, delivery_max, city, state,
-    sort_by = 'relevance', page = '1', limit = '20',
-  } = req.query as Record<string, string>;
+  const q = req.query as Record<string, string>;
+
+  // Accept both naming conventions from client
+  const query      = q.q ?? '';
+  const category   = q.category ?? '';
+  const status     = q.status ?? '';
+  const risk_level = q.risk_level ?? '';
+  const rating_min = q.rating_min ?? q.min_rating ?? '';
+  const price_min  = q.price_min ?? '';
+  const price_max  = q.price_max ?? q.max_price ?? '';
+  const delivery_max = q.delivery_max ?? q.max_delivery ?? '';
+  const city       = q.city ?? '';
+  const state      = q.state ?? '';
+  const sort_by    = q.sort_by ?? q.sort ?? 'relevance';
+  const page       = Number(q.page ?? '1');
+  const limit      = Number(q.limit ?? '12');
 
   let where = '1=1';
   const params: unknown[] = [];
 
-  if (q) {
+  if (query) {
     where += ' AND (s.name LIKE ? OR s.category LIKE ? OR s.subcategory LIKE ? OR s.city LIKE ? OR s.notes LIKE ?)';
-    const like = `%${q}%`;
+    const like = `%${query}%`;
     params.push(like, like, like, like, like);
   }
   if (category) { where += ' AND s.category=?'; params.push(category); }
-  if (status) { where += ' AND s.status=?'; params.push(status); }
+  if (status)   { where += ' AND s.status=?';   params.push(status); }
   if (risk_level) { where += ' AND s.risk_level=?'; params.push(risk_level); }
   if (rating_min) { where += ' AND s.rating>=?'; params.push(Number(rating_min)); }
-  if (price_min) { where += ' AND s.avg_price>=?'; params.push(Number(price_min)); }
-  if (price_max) { where += ' AND s.avg_price<=?'; params.push(Number(price_max)); }
+  if (price_min)  { where += ' AND s.avg_price>=?'; params.push(Number(price_min)); }
+  if (price_max)  { where += ' AND s.avg_price<=?'; params.push(Number(price_max)); }
   if (delivery_max) { where += ' AND s.delivery_days<=?'; params.push(Number(delivery_max)); }
-  if (city) { where += ' AND s.city LIKE ?'; params.push(`%${city}%`); }
+  if (city)  { where += ' AND s.city LIKE ?';  params.push(`%${city}%`); }
   if (state) { where += ' AND s.state=?'; params.push(state); }
 
-  const offset = (Number(page) - 1) * Number(limit);
+  const offset = (page - 1) * limit;
   const total = (db.prepare(`SELECT COUNT(*) as c FROM suppliers s WHERE ${where}`).get(...params) as { c: number }).c;
 
   const allMatches = db.prepare(`
-    SELECT s.*, (SELECT COUNT(*) FROM quotes q WHERE q.supplier_id=s.id) as quote_count,
+    SELECT s.*, (SELECT COUNT(*) FROM quotes q WHERE q.supplier_id=s.id) as total_quotes,
       (SELECT COALESCE(SUM(total_price),0) FROM quotes q WHERE q.supplier_id=s.id AND q.status='approved') as total_volume,
       (SELECT MAX(created_at) FROM quotes q WHERE q.supplier_id=s.id) as last_activity
     FROM suppliers s WHERE ${where}
@@ -72,39 +83,39 @@ router.get('/suppliers', (req: AuthRequest, res: Response) => {
   // Calculate match scores
   const withScores = allMatches.map(s => ({
     ...s,
-    match_score: calculateMatchScore(s as Parameters<typeof calculateMatchScore>[0], q),
+    match_score: calculateMatchScore(s as Parameters<typeof calculateMatchScore>[0], query),
   }));
 
   // Sort
   if (sort_by === 'relevance') withScores.sort((a, b) => (b.match_score as number) - (a.match_score as number));
   else if (sort_by === 'rating') withScores.sort((a, b) => (b.rating as number) - (a.rating as number));
   else if (sort_by === 'price_asc') withScores.sort((a, b) => (a.avg_price as number) - (b.avg_price as number));
-  else if (sort_by === 'price_desc') withScores.sort((a, b) => (b.avg_price as number) - (a.avg_price as number));
-  else if (sort_by === 'volume') withScores.sort((a, b) => (b.total_volume as number) - (a.total_volume as number));
-  else if (sort_by === 'delivery') withScores.sort((a, b) => (a.delivery_days as number) - (b.delivery_days as number));
+  else if (sort_by === 'volume_desc') withScores.sort((a, b) => (b.total_volume as number) - (a.total_volume as number));
+  else if (sort_by === 'delivery_asc') withScores.sort((a, b) => (a.delivery_days as number) - (b.delivery_days as number));
 
-  const paginated = withScores.slice(offset, offset + Number(limit));
+  const paginated = withScores.slice(offset, offset + limit);
 
   // Facets
-  const allSuppliers = db.prepare(`SELECT category, status, city FROM suppliers s WHERE ${where}`).all(...params) as Array<{ category: string; status: string; city: string }>;
+  const allSuppliers = db.prepare(`SELECT category, risk_level, state FROM suppliers s WHERE ${where}`).all(...params) as Array<{ category: string; risk_level: string; state: string }>;
   const catMap = new Map<string, number>();
-  const statusMap = new Map<string, number>();
-  const cityMap = new Map<string, number>();
+  const riskMap = new Map<string, number>();
+  const stateMap = new Map<string, number>();
   for (const s of allSuppliers) {
-    catMap.set(s.category, (catMap.get(s.category) || 0) + 1);
-    statusMap.set(s.status, (statusMap.get(s.status) || 0) + 1);
-    if (s.city) cityMap.set(s.city, (cityMap.get(s.city) || 0) + 1);
+    if (s.category) catMap.set(s.category, (catMap.get(s.category) || 0) + 1);
+    if (s.risk_level) riskMap.set(s.risk_level, (riskMap.get(s.risk_level) || 0) + 1);
+    if (s.state) stateMap.set(s.state, (stateMap.get(s.state) || 0) + 1);
   }
+
+  const facets = {
+    categories: Array.from(catMap.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
+    risk_levels: Array.from(riskMap.entries()).map(([risk_level, count]) => ({ risk_level, count })),
+    states: Array.from(stateMap.entries()).map(([state, count]) => ({ state, count })).sort((a, b) => b.count - a.count),
+  };
 
   return res.json({
     success: true,
-    data: paginated,
-    meta: { page: Number(page), total, limit: Number(limit) },
-    facets: {
-      categories: Array.from(catMap.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
-      statuses: Array.from(statusMap.entries()).map(([name, count]) => ({ name, count })),
-      cities: Array.from(cityMap.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 10),
-    },
+    data: { suppliers: paginated, facets, total },
+    meta: { page, total, limit },
   });
 });
 
