@@ -61,15 +61,17 @@ function parseFileSync(filePath: string, ext: string): { headers: string[]; rows
     const Papa = require('papaparse');
     const content = fs.readFileSync(filePath, 'utf-8');
     const result = Papa.parse(content, { header: false });
-    const data = result.data as string[][];
-    return { headers: data[0] || [], rows: data.slice(1).filter((r: string[]) => r.some(c => c)) };
+    const data = result.data as unknown[][];
+    const headers = (data[0] || []).map((h: unknown) => String(h ?? ''));
+    return { headers, rows: data.slice(1).filter((r: unknown[]) => r.some(c => c)) as string[][] };
   } else {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const XLSX = require('xlsx');
     const wb = XLSX.readFile(filePath);
     const ws = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as string[][];
-    return { headers: data[0] || [], rows: data.slice(1).filter((r: string[]) => r.some(c => c)) };
+    const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as unknown[][];
+    const headers = (data[0] || []).map((h: unknown) => String(h ?? ''));
+    return { headers, rows: data.slice(1).filter((r: unknown[]) => r.some(c => c)) as string[][] };
   }
 }
 
@@ -142,12 +144,16 @@ router.use(verifyToken);
 
 router.post('/', upload.single('file'), (req: AuthRequest, res: Response) => {
   if (!req.file) return res.status(400).json({ success: false, error: 'Arquivo não enviado' });
-  const ext = path.extname(req.file.originalname).toLowerCase();
-  const { headers, rows } = parseFileSync(req.file.path, ext);
-  const result = db.prepare(`INSERT INTO uploads (filename, original_name, file_type, rows_total, status, uploaded_by) VALUES (?,?,?,?,?,?)`)
-    .run(req.file.filename, req.file.originalname, ext, rows.length, 'processing', req.user!.name);
-  const previewRows = rows.slice(0, 20).map(row => Object.fromEntries(headers.map((h, i) => [h, row[i] || ''])));
-  return res.json({ success: true, data: { upload_id: result.lastInsertRowid, headers, preview_rows: previewRows, suggested_mapping: autoDetectMapping(headers), total_rows: rows.length } });
+  try {
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const { headers, rows } = parseFileSync(req.file.path, ext);
+    const result = db.prepare(`INSERT INTO uploads (filename, original_name, file_type, rows_total, status, uploaded_by) VALUES (?,?,?,?,?,?)`)
+      .run(req.file.filename, req.file.originalname, ext, rows.length, 'processing', req.user!.name);
+    const previewRows = rows.slice(0, 20).map(row => Object.fromEntries(headers.map((h, i) => [h, String((row as unknown[])[i] ?? '')])));
+    return res.json({ success: true, data: { upload_id: result.lastInsertRowid, headers, preview_rows: previewRows, suggested_mapping: autoDetectMapping(headers), total_rows: rows.length } });
+  } catch {
+    return res.status(422).json({ success: false, error: 'Não foi possível processar o arquivo. Verifique o formato.' });
+  }
 });
 
 router.get('/', (req: AuthRequest, res: Response) => {

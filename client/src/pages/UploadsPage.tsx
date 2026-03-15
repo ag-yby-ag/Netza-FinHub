@@ -172,7 +172,7 @@ export default function UploadsPage() {
                     className="input-base flex-1 h-9 text-xs"
                   >
                     <option value="">— Ignorar —</option>
-                    {uploadData.headers.map(h => <option key={h} value={h}>{h}</option>)}
+                    {(uploadData.headers || []).map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
                 </div>
               ))}
@@ -181,20 +181,20 @@ export default function UploadsPage() {
 
           {/* Preview table */}
           <Card className="p-5">
-            <div className="label-mono mb-3">Prévia dos dados ({uploadData.preview_rows.length} primeiras linhas)</div>
+            <div className="label-mono mb-3">Prévia dos dados ({(uploadData.preview_rows || []).length} primeiras linhas)</div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-white/10">
-                    {uploadData.headers.slice(0, 6).map(h => (
+                    {(uploadData.headers || []).slice(0, 6).map(h => (
                       <th key={h} className="label-mono px-3 py-2 text-left">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {uploadData.preview_rows.slice(0, 8).map((row, i) => (
+                  {(uploadData.preview_rows || []).slice(0, 8).map((row, i) => (
                     <tr key={i} className="border-b border-gray-50 dark:border-white/5">
-                      {uploadData.headers.slice(0, 6).map(h => (
+                      {(uploadData.headers || []).slice(0, 6).map(h => (
                         <td key={h} className="px-3 py-2 text-gray-600 dark:text-gray-400 font-mono">{row[h] || '—'}</td>
                       ))}
                     </tr>
