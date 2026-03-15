@@ -1,7 +1,16 @@
-import Groq from 'groq-sdk';
 import db from '../db/database';
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// Lazy-initialize Groq client to avoid loading groq-sdk at cold start
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _groq: any = null;
+function getGroq() {
+  if (!_groq) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const Groq = require('groq-sdk').default;
+    _groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  }
+  return _groq;
+}
 const MODEL = process.env.GROQ_MODEL || 'qwen/qwen3-32b';
 
 interface AIInsight {
@@ -129,7 +138,7 @@ Analise os dados fornecidos e retorne um JSON com:
 Sempre use R$ com formatação brasileira. Seja direto e objetivo. Retorne SOMENTE o JSON.`;
 
   try {
-    const completion = await groq.chat.completions.create({
+    const completion = await getGroq().chat.completions.create({
       model: MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
