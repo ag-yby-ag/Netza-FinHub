@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env
 *.db
-server/data/uploads/
-server/data/exports/
+*.db-shm
+*.db-wal
+server/data/
 .DS_Store
