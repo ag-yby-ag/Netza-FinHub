@@ -1,9 +1,6 @@
-// Vercel serverless entry point
-// Using static TypeScript imports so @vercel/node (ncc) bundles everything
-// into a single JS file for fast cold starts
+// Vercel serverless entry point — Express app as direct handler (no wrapper needed)
 if (!process.env.VERCEL) process.env.VERCEL = '1';
 
-import serverless from 'serverless-http';
 import app from '../server/src/index';
 
-export default serverless(app);
+export default app;
