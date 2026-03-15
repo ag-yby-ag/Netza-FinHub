@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -8,61 +8,12 @@ import {
 import {
   TrendingUp, TrendingDown, DollarSign, Percent, Users,
   FileSpreadsheet, RefreshCw, ChevronDown, Cpu, CheckCircle,
-  Minus,
+  Minus, FileDown,
 } from 'lucide-react'
 import api from '../lib/api'
 import { formatCurrency, cn } from '../lib/utils'
 import { useToast } from '../components/ui/Toast'
-
-// ── Types ────────────────────────────────────────────────────────────────────
-interface Summary {
-  total_volume: number
-  savings: number
-  avg_ticket: number
-  active_suppliers: number
-  total_quotes: number
-  volume_change_pct: number
-  savings_change_pct: number
-  ticket_change_pct: number
-  suppliers_change: number
-}
-
-interface MonthPoint {
-  period: string
-  volume: number
-  quote_count?: number
-  approved_count?: number
-  avg_ticket?: number
-}
-
-interface CategoryData {
-  category: string
-  supplier_count: number
-  quote_count: number
-  total_spend: number
-  avg_ticket: number
-  avg_rating: number
-  spend_pct: number
-  trend: 'up' | 'down' | 'stable'
-}
-
-interface RankingItem {
-  id: number
-  name: string
-  category: string
-  rating: number
-  status: string
-  quote_count: number
-  total_volume: number
-  avg_ticket: number
-  volume_pct: number
-}
-
-interface AIInsight {
-  insight: string
-  highlights: string[]
-  recommendations: string[]
-}
+import { useAnalytics } from '../hooks/useAnalytics'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const CHART_COLORS = ['#6DED67', '#4DA6FF', '#FFB800', '#FF4D4D', '#A855F7', '#F97316', '#06B6D4', '#EC4899']
@@ -77,18 +28,12 @@ function formatMonthLabel(period: string) {
   return `${MONTH_LABELS[m] ?? m}/${y?.slice(2)}`
 }
 
-function getPeriodDates(period: string) {
-  const now = new Date()
-  const months = period === 'month' ? 1 : period === 'quarter' ? 3 : period === 'semester' ? 6 : 12
-  const start = new Date(now.getFullYear(), now.getMonth() - months, 1)
-  return {
-    start_date: start.toISOString().slice(0, 10),
-    end_date: now.toISOString().slice(0, 10),
-  }
-}
-
 // ── Custom Tooltip ────────────────────────────────────────────────────────────
-function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string; color: string }>; label?: string }) {
+function ChartTooltip({ active, payload, label }: {
+  active?: boolean
+  payload?: Array<{ value: number; name: string; color: string }>
+  label?: string
+}) {
   if (!active || !payload?.length) return null
   return (
     <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 rounded-xl p-3 shadow-md">
@@ -141,7 +86,7 @@ function KPICard({
 }
 
 // ── AI Insight Card ───────────────────────────────────────────────────────────
-function AICard({ insight, loading }: { insight: AIInsight | null; loading: boolean }) {
+function AICard({ insight, loading }: { insight: { insight: string; highlights: string[]; recommendations: string[] } | null; loading: boolean }) {
   if (loading) {
     return (
       <div className="bg-brand rounded-card p-5 animate-pulse">
@@ -194,62 +139,15 @@ export function AnalyticsPage() {
   const [period, setPeriod] = useState('month')
   const [category, setCategory] = useState('')
   const [trendMode, setTrendMode] = useState<'monthly' | 'cumulative'>('monthly')
-  const [rankSort, setRankSort] = useState<'volume' | 'rating'>('volume')
+  const [rankSort, setRankSort] = useState<'volume' | 'rating' | 'savings'>('volume')
+  const [exporting, setExporting] = useState<'xlsx' | 'pdf' | null>(null)
 
-  const [summary, setSummary] = useState<Summary | null>(null)
-  const [monthly, setMonthly] = useState<MonthPoint[]>([])
-  const [forecast, setForecast] = useState<MonthPoint[]>([])
-  const [categories, setCategories] = useState<CategoryData[]>([])
-  const [ranking, setRanking] = useState<RankingItem[]>([])
-  const [aiInsight, setAiInsight] = useState<AIInsight | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [aiLoading, setAiLoading] = useState(true)
-  const [exporting, setExporting] = useState(false)
+  const {
+    summary, monthly, forecast, categories, ranking,
+    aiInsight, loading, aiLoading, dates, refetch,
+  } = useAnalytics({ period, category, rankSort })
 
-  const dates = useMemo(() => getPeriodDates(period), [period])
-
-  const fetchAll = async () => {
-    setLoading(true)
-    try {
-      const params = new URLSearchParams({
-        start_date: dates.start_date,
-        end_date: dates.end_date,
-        ...(category ? { category } : {}),
-      })
-
-      const [sumRes, trendRes, catRes, rankRes] = await Promise.all([
-        api.get(`/analytics/summary?${params}`),
-        api.get(`/analytics/trends?${params}`),
-        api.get(`/analytics/categories?${params}`),
-        api.get(`/analytics/suppliers/ranking?${params}&sort_by=${rankSort}&limit=10`),
-      ])
-
-      setSummary(sumRes.data.data)
-      setMonthly(trendRes.data.data?.monthly ?? [])
-      setForecast(trendRes.data.data?.forecast ?? [])
-      setCategories(catRes.data.data ?? [])
-      setRanking(rankRes.data.data ?? [])
-    } catch {
-      toast('error', 'Erro ao carregar analytics')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchAI = async () => {
-    setAiLoading(true)
-    try {
-      const params = new URLSearchParams({ period, ...(category ? { category } : {}) })
-      const res = await api.get(`/analytics/ai-insight?${params}`)
-      setAiInsight(res.data.data)
-    } catch { /* ignore */ }
-    finally { setAiLoading(false) }
-  }
-
-  useEffect(() => { fetchAll() }, [period, category, rankSort]) // eslint-disable-line
-  useEffect(() => { fetchAI() }, [period, category]) // eslint-disable-line
-
-  // Chart data
+  // Chart data: combine monthly + forecast with bridge point
   const chartData = useMemo(() => {
     let cum = 0
     const real = monthly.map(m => {
@@ -263,7 +161,6 @@ export function AnalyticsPage() {
       }
     })
 
-    // Connect forecast from last real point
     let cumF = cum
     const fore = forecast.map(f => {
       cumF += f.volume
@@ -283,16 +180,16 @@ export function AnalyticsPage() {
     }
 
     return [...real, ...fore]
-  }, [monthly, forecast, trendMode])
+  }, [monthly, forecast])
 
   const realKey = trendMode === 'monthly' ? 'real' : 'cumReal'
   const foreKey = trendMode === 'monthly' ? 'forecast' : 'cumForecast'
 
-  const handleExport = async () => {
-    setExporting(true)
+  const handleExport = async (format: 'xlsx' | 'pdf') => {
+    setExporting(format)
     try {
       const res = await api.post('/analytics/export', {
-        format: 'xlsx',
+        format,
         start_date: dates.start_date,
         end_date: dates.end_date,
         category,
@@ -300,14 +197,14 @@ export function AnalyticsPage() {
       const url = URL.createObjectURL(res.data)
       const a = document.createElement('a')
       a.href = url
-      a.download = `analytics_${new Date().toISOString().slice(0, 10)}.xlsx`
+      a.download = `analytics_${new Date().toISOString().slice(0, 10)}.${format}`
       a.click()
       URL.revokeObjectURL(url)
       toast('success', 'Exportado com sucesso!')
     } catch {
       toast('error', 'Erro ao exportar')
     } finally {
-      setExporting(false)
+      setExporting(null)
     }
   }
 
@@ -339,18 +236,26 @@ export function AnalyticsPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={fetchAll}
+            onClick={refetch}
             className="p-2 rounded-input border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 transition-colors"
           >
             <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
           </button>
           <button
-            onClick={handleExport}
-            disabled={exporting}
+            onClick={() => handleExport('pdf')}
+            disabled={exporting !== null}
+            className="btn-secondary py-2 px-4 text-sm flex items-center gap-2"
+          >
+            <FileDown size={15} />
+            {exporting === 'pdf' ? 'Exportando...' : 'Exportar PDF'}
+          </button>
+          <button
+            onClick={() => handleExport('xlsx')}
+            disabled={exporting !== null}
             className="btn-primary py-2 px-4 text-sm flex items-center gap-2"
           >
             <FileSpreadsheet size={15} />
-            {exporting ? 'Exportando...' : 'Exportar Excel'}
+            {exporting === 'xlsx' ? 'Exportando...' : 'Exportar Excel'}
           </button>
         </div>
       </div>
@@ -590,7 +495,7 @@ export function AnalyticsPage() {
             <p className="font-display font-bold text-dark dark:text-white">Top fornecedores</p>
           </div>
           <div className="flex items-center gap-1 p-0.5 bg-gray-100 dark:bg-white/5 rounded-lg">
-            {(['volume', 'rating'] as const).map(s => (
+            {(['volume', 'rating', 'savings'] as const).map(s => (
               <button
                 key={s}
                 onClick={() => setRankSort(s)}
@@ -599,7 +504,7 @@ export function AnalyticsPage() {
                   rankSort === s ? 'bg-white dark:bg-white/10 shadow-sm text-dark dark:text-white' : 'text-gray-400'
                 )}
               >
-                {s === 'volume' ? 'Volume' : 'Rating'}
+                {s === 'volume' ? 'Volume' : s === 'rating' ? 'Rating' : 'Economia'}
               </button>
             ))}
           </div>
@@ -635,14 +540,14 @@ export function AnalyticsPage() {
                   >
                     {s.volume_pct > 30 && (
                       <span className="text-[10px] font-mono font-bold text-dark">
-                        {formatCurrency(s.total_volume)}
+                        {formatCurrency(rankSort === 'savings' ? s.savings : s.total_volume)}
                       </span>
                     )}
                   </motion.div>
                 </div>
                 {s.volume_pct <= 30 && (
                   <span className="text-[10px] font-mono text-gray-500 w-20 flex-shrink-0">
-                    {formatCurrency(s.total_volume)}
+                    {formatCurrency(rankSort === 'savings' ? s.savings : s.total_volume)}
                   </span>
                 )}
                 <div className="flex items-center gap-0.5 text-[11px] text-warning flex-shrink-0 w-10 justify-end">
@@ -670,7 +575,7 @@ export function AnalyticsPage() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-white/10">
-                  {['Categoria', 'Fornecedores', 'Volume', 'Ticket Médio', 'Rating', 'Tendência'].map(col => (
+                  {['Categoria', 'Fornecedores', 'Volume', 'Economia', 'Ticket Médio', 'Rating', 'Tendência'].map(col => (
                     <th key={col} className="label-mono pb-3 text-left first:pl-0">
                       {col}
                     </th>
@@ -693,6 +598,11 @@ export function AnalyticsPage() {
                     <td className="py-3 pr-4 font-mono text-gray-500">{c.supplier_count}</td>
                     <td className="py-3 pr-4 font-mono font-bold text-dark dark:text-white">
                       {formatCurrency(c.total_spend)}
+                    </td>
+                    <td className="py-3 pr-4">
+                      <span className="font-mono text-brand-dark dark:text-brand font-semibold">
+                        {formatCurrency(c.savings ?? 0)}
+                      </span>
                     </td>
                     <td className="py-3 pr-4 font-mono text-gray-500">
                       {formatCurrency(c.avg_ticket)}

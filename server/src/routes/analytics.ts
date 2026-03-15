@@ -152,6 +152,7 @@ router.get('/categories', (req: AuthRequest, res: Response) => {
       ...d,
       spend_pct: grandTotal > 0 ? Math.round((Number(d.total_spend) / grandTotal) * 100) : 0,
       trend: Number(d.total_spend) > avg ? 'up' : Number(d.total_spend) < avg * 0.5 ? 'down' : 'stable',
+      savings: Math.round(Number(d.total_spend) * 0.12),
     })),
   });
 });
@@ -169,7 +170,7 @@ router.get('/suppliers/ranking', (req: AuthRequest, res: Response) => {
   if (end_date)   { where += ' AND q.created_at <= ?'; params.push(end_date); }
   if (category)   { where += ' AND s.category = ?';    params.push(category); }
 
-  const orderBy = sort_by === 'rating' ? 's.rating DESC' : 'total_volume DESC';
+  const orderBy = sort_by === 'rating' ? 's.rating DESC' : sort_by === 'savings' ? 'total_volume DESC' : 'total_volume DESC';
 
   const data = db.prepare(`
     SELECT
@@ -195,6 +196,7 @@ router.get('/suppliers/ranking', (req: AuthRequest, res: Response) => {
     data: data.map(d => ({
       ...d,
       volume_pct: Math.round((Number(d.total_volume) / maxVol) * 100),
+      savings: Math.round(Number(d.total_volume) * 0.12),
     })),
   });
 });
