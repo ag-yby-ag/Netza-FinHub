@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs';
 import db from './database';
 import { runMigrations } from './migrations';
 
@@ -141,11 +140,10 @@ export function runSeed() {
 
   console.log('🌱 Starting seed...');
 
-  // Pre-compute hashes outside transaction (CPU-intensive, not DB work)
-  // Use cost 8 (still secure, ~4x faster than 10 for serverless cold starts)
-  const bcryptRounds = process.env.VERCEL ? 8 : 10;
-  const passwordHash = bcrypt.hashSync('admin123', bcryptRounds);
-  const viewerHash = bcrypt.hashSync('viewer123', bcryptRounds);
+  // Use pre-generated hashes to avoid bcrypt CPU cost on serverless cold starts
+  // These are bcrypt(cost=10) hashes for 'admin123' and 'viewer123'
+  const passwordHash = '$2a$10$PmimXLPPOB8udZxVeYSng.im96KvB4mH5xoaie97AX2pWR32MfMIS';
+  const viewerHash = '$2a$10$bV2BHREdqngijcoFehs7ZOlsMkDMLbmrVi.H6ziE8Y5NZmLUJvdyy';
 
   // Wrap everything in a single transaction for ~100x faster bulk inserts
   const doSeed = db.transaction(() => {
