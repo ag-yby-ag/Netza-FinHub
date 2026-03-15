@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #F7F7F7;
+    color: #0D0D0D;
+  }
+
+  html.dark body {
+    background-color: #0D0D0D;
+    color: #F7F7F7;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #D4D4D4;
+    border-radius: 3px;
+  }
+  html.dark ::-webkit-scrollbar-thumb {
+    background: #404040;
+  }
+}
+
+@layer components {
+  .label-mono {
+    @apply font-mono text-[9px] uppercase tracking-[0.08em] text-gray-500;
+  }
+
+  .title-display {
+    @apply font-display font-bold tracking-[-0.03em];
+  }
+
+  .card-base {
+    @apply bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 rounded-card;
+  }
+
+  .btn-primary {
+    @apply bg-brand text-dark hover:bg-brand-hover font-display font-semibold text-sm px-5 py-2.5 rounded-pill transition-all duration-200 hover:-translate-y-px hover:shadow-green active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent border-2 border-dark dark:border-white text-dark dark:text-white hover:bg-dark dark:hover:bg-white hover:text-white dark:hover:text-dark font-display font-semibold text-sm px-5 py-2.5 rounded-pill transition-all duration-200;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-brand font-display font-medium text-sm px-4 py-2 rounded-pill transition-all duration-200;
+  }
+
+  .btn-danger {
+    @apply bg-transparent border-[1.5px] border-error text-error hover:bg-error hover:text-white font-display font-medium text-sm px-4 py-2 rounded-pill transition-all duration-200;
+  }
+
+  .input-base {
+    @apply w-full h-[44px] px-3 bg-white dark:bg-dark-soft border border-gray-200 dark:border-white/10 rounded-input text-sm text-dark dark:text-white placeholder-gray-400 focus:outline-none focus:border-brand dark:focus:border-brand transition-colors duration-200;
+  }
+
+  .badge-green {
+    @apply bg-brand text-dark text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-pill;
+  }
+
+  .badge-dark {
+    @apply bg-dark dark:bg-white/10 text-white dark:text-white text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-pill;
+  }
+
+  .badge-outline {
+    @apply border border-current text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-pill;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 font-body font-medium text-sm cursor-pointer transition-all duration-200 border-l-[3px] border-transparent hover:text-white hover:bg-white/5;
+  }
+
+  .nav-item-active {
+    @apply text-brand bg-brand/5 border-l-brand;
+  }
+}
