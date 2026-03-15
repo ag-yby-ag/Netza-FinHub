@@ -1,122 +1,173 @@
 import { Router, Response } from 'express';
 import db from '../db/database';
 import { verifyToken, AuthRequest } from '../middleware/auth';
-import { calculateMatchScore } from '../services/searchService';
 
 const router = Router();
 router.use(verifyToken);
 
-// GET /api/search/global?q=
+// ── GET /api/search/global ──────────────────────────────────────────────────
 router.get('/global', (req: AuthRequest, res: Response) => {
   const { q = '', limit = '5' } = req.query as Record<string, string>;
-  if (!q.trim()) return res.json({ success: true, data: { suppliers: [], quotes: [], uploads: [] } });
+  if (!q || q.length < 2) {
+    return res.json({ success: true, data: { suppliers: [], quotes: [], uploads: [] } });
+  }
 
   const like = `%${q}%`;
   const lim = Number(limit);
 
   const suppliers = db.prepare(`
-    SELECT id, name, category, rating, status FROM suppliers
-    WHERE name LIKE ? OR category LIKE ? OR cnpj LIKE ? LIMIT ?
+    SELECT id, name, category, rating, status, city, state
+    FROM suppliers
+    WHERE name LIKE ? OR cnpj LIKE ? OR category LIKE ?
+    ORDER BY rating DESC LIMIT ?
   `).all(like, like, like, lim);
 
   const quotes = db.prepare(`
     SELECT q.id, q.item_description, q.total_price, q.status, s.name as supplier_name
-    FROM quotes q LEFT JOIN suppliers s ON q.supplier_id=s.id
-    WHERE q.item_description LIKE ? OR s.name LIKE ? LIMIT ?
+    FROM quotes q JOIN suppliers s ON s.id = q.supplier_id
+    WHERE q.item_description LIKE ? OR s.name LIKE ?
+    ORDER BY q.created_at DESC LIMIT ?
   `).all(like, like, lim);
 
   const uploads = db.prepare(`
-    SELECT id, original_name, rows_total, status FROM uploads
-    WHERE original_name LIKE ? LIMIT ?
+    SELECT id, original_name, rows_total, status, created_at
+    FROM uploads WHERE original_name LIKE ?
+    ORDER BY created_at DESC LIMIT ?
   `).all(like, lim);
 
   return res.json({ success: true, data: { suppliers, quotes, uploads } });
 });
 
-// GET /api/search/suppliers
+// ── GET /api/search/suppliers ───────────────────────────────────────────────
 router.get('/suppliers', (req: AuthRequest, res: Response) => {
-  const q = req.query as Record<string, string>;
+  const {
+    q = '',
+    category,
+    status,
+    rating_min,
+    price_min,
+    price_max,
+    delivery_max,
+    state,
+    risk_level,
+    sort_by = 'relevance',
+    page = '1',
+    limit = '12',
+  } = req.query as Record<string, string>;
 
-  // Accept both naming conventions from client
-  const query      = q.q ?? '';
-  const category   = q.category ?? '';
-  const status     = q.status ?? '';
-  const risk_level = q.risk_level ?? '';
-  const rating_min = q.rating_min ?? q.min_rating ?? '';
-  const price_min  = q.price_min ?? '';
-  const price_max  = q.price_max ?? q.max_price ?? '';
-  const delivery_max = q.delivery_max ?? q.max_delivery ?? '';
-  const city       = q.city ?? '';
-  const state      = q.state ?? '';
-  const sort_by    = q.sort_by ?? q.sort ?? 'relevance';
-  const page       = Number(q.page ?? '1');
-  const limit      = Number(q.limit ?? '12');
+  const offset = (Number(page) - 1) * Number(limit);
 
-  let where = '1=1';
-  const params: unknown[] = [];
+  // Build WHERE clause (all columns use alias 's.')
+  let where = 'WHERE 1=1';
+  const fp: unknown[] = []; // filter params
 
-  if (query) {
-    where += ' AND (s.name LIKE ? OR s.category LIKE ? OR s.subcategory LIKE ? OR s.city LIKE ? OR s.notes LIKE ?)';
-    const like = `%${query}%`;
-    params.push(like, like, like, like, like);
+  if (q) {
+    where += ` AND (
+      s.name LIKE ? OR s.category LIKE ? OR s.subcategory LIKE ?
+      OR s.city LIKE ? OR s.state LIKE ? OR s.notes LIKE ? OR s.cnpj LIKE ?
+    )`;
+    const like = `%${q}%`;
+    fp.push(like, like, like, like, like, like, like);
   }
-  if (category) { where += ' AND s.category=?'; params.push(category); }
-  if (status)   { where += ' AND s.status=?';   params.push(status); }
-  if (risk_level) { where += ' AND s.risk_level=?'; params.push(risk_level); }
-  if (rating_min) { where += ' AND s.rating>=?'; params.push(Number(rating_min)); }
-  if (price_min)  { where += ' AND s.avg_price>=?'; params.push(Number(price_min)); }
-  if (price_max)  { where += ' AND s.avg_price<=?'; params.push(Number(price_max)); }
-  if (delivery_max) { where += ' AND s.delivery_days<=?'; params.push(Number(delivery_max)); }
-  if (city)  { where += ' AND s.city LIKE ?';  params.push(`%${city}%`); }
-  if (state) { where += ' AND s.state=?'; params.push(state); }
+  if (category)     { where += ' AND s.category = ?';    fp.push(category); }
+  if (status)       { where += ' AND s.status = ?';      fp.push(status); }
+  if (rating_min)   { where += ' AND s.rating >= ?';     fp.push(Number(rating_min)); }
+  if (price_min)    { where += ' AND s.avg_price >= ?';  fp.push(Number(price_min)); }
+  if (price_max)    { where += ' AND s.avg_price <= ?';  fp.push(Number(price_max)); }
+  if (delivery_max) { where += ' AND s.delivery_days <= ?'; fp.push(Number(delivery_max)); }
+  if (state)        { where += ' AND s.state = ?';       fp.push(state); }
+  if (risk_level)   { where += ' AND s.risk_level = ?';  fp.push(risk_level); }
 
-  const offset = (page - 1) * limit;
-  const total = (db.prepare(`SELECT COUNT(*) as c FROM suppliers s WHERE ${where}`).get(...params) as { c: number }).c;
+  // Count
+  const totalRow = db.prepare(
+    `SELECT COUNT(DISTINCT s.id) as total FROM suppliers s ${where}`
+  ).get(...fp) as { total: number };
 
-  const allMatches = db.prepare(`
-    SELECT s.*, (SELECT COUNT(*) FROM quotes q WHERE q.supplier_id=s.id) as total_quotes,
-      (SELECT COALESCE(SUM(total_price),0) FROM quotes q WHERE q.supplier_id=s.id AND q.status='approved') as total_volume,
-      (SELECT MAX(created_at) FROM quotes q WHERE q.supplier_id=s.id) as last_activity
-    FROM suppliers s WHERE ${where}
-  `).all(...params) as Array<Record<string, unknown>>;
+  // Score params (6 positional: name, category, subcategory, city, state, notes)
+  const sl = q ? `%${q}%` : '%%';
+  const sp = [sl, sl, sl, sl, sl, sl];
 
-  // Calculate match scores
-  const withScores = allMatches.map(s => ({
-    ...s,
-    match_score: calculateMatchScore(s as Parameters<typeof calculateMatchScore>[0], query),
-  }));
+  // Order
+  let orderBy = 'match_score DESC, s.rating DESC';
+  if (sort_by === 'rating')     orderBy = 's.rating DESC';
+  if (sort_by === 'price_asc')  orderBy = 's.avg_price ASC';
+  if (sort_by === 'price_desc') orderBy = 's.avg_price DESC';
+  if (sort_by === 'delivery')   orderBy = 's.delivery_days ASC';
+  if (sort_by === 'volume')     orderBy = 'total_volume DESC';
 
-  // Sort
-  if (sort_by === 'relevance') withScores.sort((a, b) => (b.match_score as number) - (a.match_score as number));
-  else if (sort_by === 'rating') withScores.sort((a, b) => (b.rating as number) - (a.rating as number));
-  else if (sort_by === 'price_asc') withScores.sort((a, b) => (a.avg_price as number) - (b.avg_price as number));
-  else if (sort_by === 'volume_desc') withScores.sort((a, b) => (b.total_volume as number) - (a.total_volume as number));
-  else if (sort_by === 'delivery_asc') withScores.sort((a, b) => (a.delivery_days as number) - (b.delivery_days as number));
+  const rows = db.prepare(`
+    SELECT s.*,
+      COUNT(q.id) as quote_count,
+      COALESCE(SUM(q.total_price), 0) as total_volume,
+      MAX(q.created_at) as last_activity,
+      (
+        CASE WHEN s.name LIKE ? THEN 40 ELSE 0 END +
+        CASE WHEN s.category LIKE ? THEN 25 ELSE 0 END +
+        CASE WHEN s.subcategory LIKE ? THEN 15 ELSE 0 END +
+        CASE WHEN s.city LIKE ? OR s.state LIKE ? THEN 10 ELSE 0 END +
+        CASE WHEN s.notes LIKE ? THEN 5 ELSE 0 END +
+        CASE WHEN s.rating >= 4.5 THEN 5 ELSE 0 END +
+        CASE WHEN s.status = 'active' THEN 5 ELSE 0 END
+      ) as match_score
+    FROM suppliers s
+    LEFT JOIN quotes q ON q.supplier_id = s.id
+    ${where}
+    GROUP BY s.id
+    ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
+  `).all(...sp, ...fp, Number(limit), offset) as Array<Record<string, unknown>>;
 
-  const paginated = withScores.slice(offset, offset + limit);
+  // Facets (reuse same WHERE + fp)
+  const facetCategories = db.prepare(
+    `SELECT s.category as name, COUNT(*) as count FROM suppliers s ${where} GROUP BY s.category ORDER BY count DESC`
+  ).all(...fp);
 
-  // Facets
-  const allSuppliers = db.prepare(`SELECT category, risk_level, state FROM suppliers s WHERE ${where}`).all(...params) as Array<{ category: string; risk_level: string; state: string }>;
-  const catMap = new Map<string, number>();
-  const riskMap = new Map<string, number>();
-  const stateMap = new Map<string, number>();
-  for (const s of allSuppliers) {
-    if (s.category) catMap.set(s.category, (catMap.get(s.category) || 0) + 1);
-    if (s.risk_level) riskMap.set(s.risk_level, (riskMap.get(s.risk_level) || 0) + 1);
-    if (s.state) stateMap.set(s.state, (stateMap.get(s.state) || 0) + 1);
-  }
+  const facetStatuses = db.prepare(
+    `SELECT s.status as name, COUNT(*) as count FROM suppliers s ${where} GROUP BY s.status`
+  ).all(...fp);
 
-  const facets = {
-    categories: Array.from(catMap.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
-    risk_levels: Array.from(riskMap.entries()).map(([risk_level, count]) => ({ risk_level, count })),
-    states: Array.from(stateMap.entries()).map(([state, count]) => ({ state, count })).sort((a, b) => b.count - a.count),
-  };
+  const facetCities = db.prepare(
+    `SELECT s.city || ', ' || s.state as name, COUNT(*) as count
+     FROM suppliers s ${where} AND s.city IS NOT NULL AND s.state IS NOT NULL
+     GROUP BY s.city, s.state ORDER BY count DESC LIMIT 10`
+  ).all(...fp);
 
   return res.json({
     success: true,
-    data: { suppliers: paginated, facets, total },
-    meta: { page, total, limit },
+    data: rows.map(s => ({ ...s, match_score: Math.min(Number(s.match_score) || 0, 100) })),
+    meta: { page: Number(page), total: totalRow.total, limit: Number(limit) },
+    facets: {
+      categories: facetCategories,
+      statuses:   facetStatuses,
+      cities:     facetCities,
+    },
   });
+});
+
+// ── POST /api/search/request-quote ─────────────────────────────────────────
+router.post('/request-quote', (req: AuthRequest, res: Response) => {
+  const { supplier_id, item_description, quantity, unit, desired_date } = req.body;
+
+  if (!supplier_id || !item_description || !quantity) {
+    return res.status(400).json({
+      success: false,
+      error: 'Fornecedor, item e quantidade são obrigatórios',
+    });
+  }
+
+  const result = db.prepare(`
+    INSERT INTO quotes (supplier_id, item_description, quantity, unit, status, valid_until)
+    VALUES (?, ?, ?, ?, 'pending', ?)
+  `).run(supplier_id, item_description, Number(quantity), unit || 'unid', desired_date || null);
+
+  try {
+    db.prepare(`
+      INSERT INTO notifications (user_id, type, title, message, link)
+      VALUES (?, 'info', 'Orçamento solicitado', ?, '/quotes')
+    `).run(req.user?.id || 1, `Orçamento para "${item_description}" solicitado`);
+  } catch { /* ignore */ }
+
+  return res.json({ success: true, data: { id: result.lastInsertRowid } });
 });
 
 export default router;
