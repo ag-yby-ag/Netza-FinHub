@@ -81,14 +81,14 @@ export default function SupplierDetailPage() {
           </Card>
 
           {/* Contact */}
-          {(s.contact_name || s.contact_email || s.city) && (
+          {!!(s.contact_name || s.contact_email || s.city) && (
             <Card className="p-5">
               <div className="label-mono mb-3">Contato</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {s.contact_name && <div className="flex items-center gap-2 text-sm text-dark dark:text-white"><Star size={14} className="text-gray-400" /> {String(s.contact_name)}</div>}
-                {s.contact_email && <div className="flex items-center gap-2 text-sm text-dark dark:text-white"><Mail size={14} className="text-gray-400" /> {String(s.contact_email)}</div>}
-                {s.contact_phone && <div className="flex items-center gap-2 text-sm text-dark dark:text-white"><Phone size={14} className="text-gray-400" /> {String(s.contact_phone)}</div>}
-                {s.city && <div className="flex items-center gap-2 text-sm text-dark dark:text-white"><MapPin size={14} className="text-gray-400" /> {String(s.city)}, {String(s.state)}</div>}
+                {!!s.contact_name && <div className="flex items-center gap-2 text-sm text-dark dark:text-white"><Star size={14} className="text-gray-400" /> {String(s.contact_name)}</div>}
+                {!!s.contact_email && <div className="flex items-center gap-2 text-sm text-dark dark:text-white"><Mail size={14} className="text-gray-400" /> {String(s.contact_email)}</div>}
+                {!!s.contact_phone && <div className="flex items-center gap-2 text-sm text-dark dark:text-white"><Phone size={14} className="text-gray-400" /> {String(s.contact_phone)}</div>}
+                {!!s.city && <div className="flex items-center gap-2 text-sm text-dark dark:text-white"><MapPin size={14} className="text-gray-400" /> {String(s.city)}, {String(s.state)}</div>}
               </div>
             </Card>
           )}
@@ -131,7 +131,7 @@ export default function SupplierDetailPage() {
                         {[1, 2, 3, 4, 5].map(n => <Star key={n} size={11} className={n <= Number(r.rating) ? 'text-warning fill-warning' : 'text-gray-300'} />)}
                       </div>
                     </div>
-                    {r.comment && <p className="text-xs text-gray-400 leading-relaxed">{String(r.comment)}</p>}
+                    {!!r.comment && <p className="text-xs text-gray-400 leading-relaxed">{String(r.comment)}</p>}
                   </div>
                 ))}
               </div>

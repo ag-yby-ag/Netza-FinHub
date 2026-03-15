@@ -30,8 +30,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             className={cn(
               'input-base',
-              icon && 'pl-10',
-              rightElement && 'pr-10',
+              !!icon && 'pl-10',
+              !!rightElement && 'pr-10',
               error && 'border-error focus:border-error',
               className
             )}

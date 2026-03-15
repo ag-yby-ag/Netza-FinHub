@@ -123,13 +123,14 @@ export default function UploadsPage() {
 
       {/* Step: Select */}
       {step === 'select' && (
-        <Card
-          className={`p-12 border-2 border-dashed transition-colors cursor-pointer ${dragOver ? 'border-brand bg-brand-subtle' : 'border-gray-300 dark:border-white/20 hover:border-brand'}`}
+        <div
+          className={`rounded-card border-2 border-dashed transition-colors cursor-pointer p-12 bg-white dark:bg-dark-card ${dragOver ? 'border-brand bg-brand-subtle dark:bg-brand/5' : 'border-gray-300 dark:border-white/20 hover:border-brand'}`}
           onDragOver={() => setDragOver(true)}
           onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
         >
-          <div onDrop={handleDrop} className="flex flex-col items-center text-center">
+          <div className="flex flex-col items-center text-center">
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-colors ${dragOver ? 'bg-brand/20' : 'bg-gray-100 dark:bg-white/5'}`}>
               <Upload size={28} className={dragOver ? 'text-brand' : 'text-gray-400'} />
             </div>
@@ -143,7 +144,7 @@ export default function UploadsPage() {
             <p className="text-xs text-gray-400 mt-2">Tamanho máximo: 10MB</p>
           </div>
           <input ref={fileRef} type="file" accept=".csv,.xls,.xlsx" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) processFile(f); }} />
-        </Card>
+        </div>
       )}
 
       {/* Step: Preview + Mapping */}
