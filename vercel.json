@@ -5,13 +5,13 @@
       "NODE_VERSION": "20.x"
     }
   },
-  "buildCommand": "cd client && npm install && npm run build && cd ../server && npm install && npm run build && node dist/db/gen-seed.js",
+  "buildCommand": "cd client && npm install && npm run build && cd ../server && npm install && npm run build && node dist/db/gen-seed.js && cd .. && npm install && npx ncc build api/index.ts -o api/dist -e better-sqlite3 -q",
   "outputDirectory": "client/dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/index" }
+    { "source": "/api/:path*", "destination": "/api/dist/index" }
   ],
   "functions": {
-    "api/index.ts": {
+    "api/dist/index.js": {
       "maxDuration": 30,
       "includeFiles": "node_modules/better-sqlite3/build/Release/**"
     }

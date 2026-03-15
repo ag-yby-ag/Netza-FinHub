@@ -141,12 +141,16 @@ export function runSeed() {
 
   console.log('🌱 Starting seed...');
 
+  // Pre-compute hashes outside transaction (CPU-intensive, not DB work)
+  // Use cost 8 (still secure, ~4x faster than 10 for serverless cold starts)
+  const bcryptRounds = process.env.VERCEL ? 8 : 10;
+  const passwordHash = bcrypt.hashSync('admin123', bcryptRounds);
+  const viewerHash = bcrypt.hashSync('viewer123', bcryptRounds);
+
   // Wrap everything in a single transaction for ~100x faster bulk inserts
   const doSeed = db.transaction(() => {
 
   // 1. USERS FIRST
-  const passwordHash = bcrypt.hashSync('admin123', 10);
-  const viewerHash = bcrypt.hashSync('viewer123', 10);
 
   const insertUser = db.prepare(`
     INSERT INTO users (name, email, password_hash, role, department, job_title, status)
