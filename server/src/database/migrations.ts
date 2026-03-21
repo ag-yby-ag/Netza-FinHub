@@ -240,6 +240,17 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_gen_reports_template ON generated_reports(template_id);
     CREATE INDEX IF NOT EXISTS idx_gen_reports_status ON generated_reports(status);
     CREATE INDEX IF NOT EXISTS idx_gen_reports_created ON generated_reports(created_at);
+
+    -- Remote control sessions
+    CREATE TABLE IF NOT EXISTS remote_control_sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
+      api_key TEXT UNIQUE NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      last_used_at TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_rc_sessions_api_key ON remote_control_sessions(api_key);
   `);
 
   console.log('Migrations completed successfully.');

@@ -12,6 +12,7 @@ import usersRouter from './routes/users';
 import preferencesRouter from './routes/preferences';
 import settingsRouter from './routes/settings';
 import reportsRouter from './routes/reports';
+import remoteControlRouter from './routes/remoteControl';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -37,6 +38,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/preferences', preferencesRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/remote-control', remoteControlRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {

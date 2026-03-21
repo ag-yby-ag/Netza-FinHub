@@ -30,7 +30,7 @@ function seed(): void {
     permTx();
 
     const insertSetting = db.prepare(`INSERT OR IGNORE INTO system_settings (setting_key, setting_value, setting_type, description) VALUES (?, ?, ?, ?)`);
-    const settings = [['app_name','Netza FinHub','string','Nome da plataforma'],['max_upload_size_mb','10','number','Tamanho máximo de upload em MB'],['allowed_file_types','["csv","xls","xlsx"]','json','Tipos de arquivo aceitos'],['ai_enabled','true','boolean','IA de insights ativa'],['ai_auto_analyze','true','boolean','Análise automática em uploads'],['session_timeout_min','480','number','Timeout de sessão em minutos'],['maintenance_mode','false','boolean','Modo manutenção'],['default_currency','BRL','string','Moeda padrão'],['default_pagination','25','number','Itens por página padrão'],['backup_enabled','true','boolean','Backup automático ativo']];
+    const settings = [['app_name','Netza FinHub','string','Nome da plataforma'],['max_upload_size_mb','10','number','Tamanho máximo de upload em MB'],['allowed_file_types','["csv","xls","xlsx"]','json','Tipos de arquivo aceitos'],['ai_enabled','true','boolean','IA de insights ativa'],['ai_auto_analyze','true','boolean','Análise automática em uploads'],['session_timeout_min','480','number','Timeout de sessão em minutos'],['maintenance_mode','false','boolean','Modo manutenção'],['default_currency','BRL','string','Moeda padrão'],['default_pagination','25','number','Itens por página padrão'],['backup_enabled','true','boolean','Backup automático ativo'],['remote_control_enabled','true','boolean','Controle remoto via API habilitado']];
     const settingsTx = db.transaction(() => { for (const s of settings) insertSetting.run(...s as [string, string, string, string]); });
     settingsTx();
 
