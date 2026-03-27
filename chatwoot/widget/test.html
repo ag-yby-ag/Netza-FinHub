@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TICIELLE — Teste Widget · Clube TCL SEMP 2026</title>
+
+  <!-- Google Sans (fallback via Material Icons CDN) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── TCL Design Tokens ── */
+    :root {
+      --red:        #E30613;
+      --red-dark:   #B30000;
+      --red-light:  #FF2A35;
+      --red-muted:  #FFF0F0;
+      --ink:        #1A1A1A;
+      --ink-mid:    #3D3D3D;
+      --ink-soft:   #6B6B6B;
+      --border:     #EBEBEB;
+      --surface:    #F7F7F7;
+      --white:      #FFFFFF;
+      --pro-dark:   #0D1B2A;
+      --pro-accent: #1A6FA8;
+      --success:    #2E7D32;
+      --font:       'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --r-sm:       6px;
+      --r-md:       12px;
+      --r-lg:       20px;
+      --shadow-md:  0 4px 20px rgba(0,0,0,.10);
+      --shadow-lg:  0 12px 48px rgba(0,0,0,.14);
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-md);
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-badge {
+      background: var(--red);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 3px 8px;
+      border-radius: var(--r-sm);
+      text-transform: uppercase;
+    }
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .header-sub {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 1px;
+    }
+
+    /* ── Main Layout ── */
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      padding: 24px;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      height: fit-content;
+    }
+    .panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Form ── */
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-mid);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus, select:focus {
+      border-color: var(--red);
+    }
+    .field { margin-bottom: 16px; }
+    .field-hint {
+      font-size: 11px;
+      color: var(--ink-soft);
+      margin-top: 5px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 44px;
+      padding: 0 20px;
+      border-radius: var(--r-sm);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      width: 100%;
+    }
+    .btn-primary {
+      background: var(--red);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--red-dark); }
+    .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink-mid);
+      border: 1.5px solid var(--border);
+      width: auto;
+    }
+    .btn-ghost:hover { border-color: var(--ink-mid); }
+    .btn-gap { margin-top: 10px; }
+
+    /* ── Segment Toggle ── */
+    .segment-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .seg-btn {
+      height: 44px;
+      border-radius: var(--r-sm);
+      border: 2px solid var(--border);
+      background: var(--white);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--ink-soft);
+    }
+    .seg-btn.active-semp {
+      border-color: var(--red);
+      background: var(--red-muted);
+      color: var(--red-dark);
+    }
+    .seg-btn.active-pro {
+      border-color: var(--pro-accent);
+      background: #E8F4FD;
+      color: var(--pro-dark);
+    }
+
+    /* ── Status ── */
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: var(--r-sm);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .status-idle    { background: var(--surface); color: var(--ink-soft); border: 1px solid var(--border); }
+    .status-loading { background: #FFF8E1; color: #E65100; border: 1px solid #FFE082; }
+    .status-ok      { background: #E8F5E9; color: var(--success); border: 1px solid #A5D6A7; }
+    .status-error   { background: var(--red-muted); color: var(--red); border: 1px solid #FFCDD2; }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-idle    { background: var(--border); }
+    .dot-loading { background: #E65100; animation: pulse 1s infinite; }
+    .dot-ok      { background: var(--success); }
+    .dot-error   { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ── Preview Area ── */
+    .preview {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 500px;
+    }
+    .preview-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .preview-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .preview-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      padding: 40px;
+      text-align: center;
+      color: var(--ink-soft);
+    }
+    .preview-icon { font-size: 48px; }
+    .preview-msg {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink-mid);
+    }
+    .preview-hint { font-size: 13px; color: var(--ink-soft); max-width: 300px; line-height: 1.6; }
+
+    /* ── Sim Page ── */
+    .sim-page {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+    }
+    .sim-topbar {
+      height: 56px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .sim-topbar.semp { background: var(--red); color: white; }
+    .sim-topbar.pro  { background: var(--pro-dark); color: white; }
+    .sim-nav { display: flex; gap: 8px; }
+    .sim-nav span {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.4);
+      display: inline-block;
+    }
+    .sim-content {
+      flex: 1;
+      padding: 32px;
+      background: var(--surface);
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      flex-direction: column;
+    }
+    .sim-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 20px;
+      width: 100%;
+      box-shadow: var(--shadow-md);
+    }
+    .sim-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .sim-card p  { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+    .sim-points {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+    .sim-kpi {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 16px;
+      text-align: center;
+    }
+    .sim-kpi-val { font-size: 24px; font-weight: 700; }
+    .sim-kpi-val.red { color: var(--red); }
+    .sim-kpi-val.blue { color: var(--pro-accent); }
+    .sim-kpi-lbl { font-size: 11px; color: var(--ink-soft); margin-top: 4px; }
+
+    /* ── Instructions ── */
+    .steps { list-style: none; padding: 0; margin: 0; }
+    .steps li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--ink-mid);
+      line-height: 1.5;
+    }
+    .steps li:last-child { border-bottom: none; }
+    .step-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--red);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-link {
+      color: var(--red);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .step-link:hover { text-decoration: underline; }
+
+    /* ── Chatwoot Widget Overrides ── */
+    .woot-widget-bubble {
+      background-color: var(--widget-color, #E30613) !important;
+      box-shadow: 0 6px 20px rgba(227, 6, 19, 0.35) !important;
+    }
+    .woot-widget-bubble:hover {
+      background-color: var(--widget-color-hover, #B30000) !important;
+      transform: scale(1.05);
+    }
+    .woot-widget-holder {
+      border-radius: 20px !important;
+      box-shadow: 0 12px 48px rgba(0,0,0,.2) !important;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="header-logo">
+    <span style="font-size:24px">⭐</span>
+    <div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="header-title">TICIELLE</span>
+        <span class="header-badge">TCL SEMP</span>
+      </div>
+      <div class="header-sub">Teste de Widget · Chatwoot Cloud</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span id="live-dot" style="width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block"></span>
+    <span id="live-label" style="font-size:12px;color:var(--ink-soft)">offline</span>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- ── Left Panel: Config ── -->
+  <aside>
+    <!-- Segmento -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-title">Segmento</div>
+      <div class="segment-toggle">
+        <button class="seg-btn active-semp" id="btn-semp" onclick="setSegmento('semp')">
+          🔴 SEMP
+        </button>
+        <button class="seg-btn" id="btn-pro" onclick="setSegmento('pro')">
+          🔵 PRO
+        </button>
+      </div>
+    </div>
+
+    <!-- Token -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-title">Configuração</div>
+
+      <div class="field">
+        <label>Website Token do Inbox</label>
+        <input type="text" id="token-input" placeholder="Ex: abc123xyz789..." autocomplete="off">
+        <div class="field-hint">Obtido em Settings → Inboxes → seu inbox → Settings → Configuration</div>
+      </div>
+
+      <div class="field">
+        <label>Nome do participante (teste)</label>
+        <input type="text" id="user-name" value="João Silva" placeholder="Nome para testar">
+      </div>
+
+      <div class="field">
+        <label>E-mail do participante (teste)</label>
+        <input type="text" id="user-email" value="joao@teste.com.br" placeholder="email@teste.com.br">
+      </div>
+
+      <!-- Status -->
+      <div id="status-box" class="status status-idle">
+        <span class="status-dot dot-idle" id="status-dot"></span>
+        <span id="status-text">Aguardando token...</span>
+      </div>
+
+      <button class="btn btn-primary" id="btn-load" onclick="carregarWidget()">
+        ▶ Carregar Widget
+      </button>
+      <button class="btn btn-ghost btn-gap" onclick="resetarWidget()">
+        ↺ Resetar
+      </button>
+    </div>
+
+    <!-- Instruções -->
+    <div class="panel">
+      <div class="panel-title">Como obter o token</div>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          Acesse <a class="step-link" href="https://app.chatwoot.com" target="_blank">app.chatwoot.com</a> e crie uma conta gratuita
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          Vá em <strong>Settings → Inboxes → New Inbox → Website</strong>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          Nome: <strong>Chat Web SEMP TCL</strong><br>
+          Cor: <strong style="color:var(--red)">#E30613</strong><br>
+          Mensagem: <em>"Oi! Eu sou a TICIELLE ⭐"</em>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          Copie o <strong>Website Token</strong> e cole acima
+        </li>
+        <li>
+          <span class="step-num">5</span>
+          Clique <strong>Carregar Widget</strong> e teste!
+        </li>
+      </ol>
+    </div>
+  </aside>
+
+  <!-- ── Right Panel: Preview ── -->
+  <div class="preview" id="preview">
+    <div class="preview-header">
+      <span class="preview-label">Preview — Portal Clube TCL</span>
+      <button class="btn-ghost btn" id="btn-toggle-chat" onclick="toggleChat()" style="display:none;width:auto">
+        💬 Abrir Chat
+      </button>
+    </div>
+
+    <!-- Estado inicial -->
+    <div class="preview-body" id="preview-empty">
+      <div class="preview-icon">💬</div>
+      <div class="preview-msg">Configure o token e carregue o widget</div>
+      <div class="preview-hint">O widget TICIELLE aparecerá no canto inferior direito desta área quando o token for carregado.</div>
+    </div>
+
+    <!-- Simulação de página do portal (aparece após carregar) -->
+    <div class="sim-page" id="sim-page">
+      <div class="sim-topbar semp" id="sim-topbar">
+        <span id="sim-prog-name">Clube TCL SEMP</span>
+        <div class="sim-nav">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="sim-content">
+        <div class="sim-points">
+          <div class="sim-kpi">
+            <div class="sim-kpi-val red" id="sim-pts">1.247</div>
+            <div class="sim-kpi-lbl">Pontos</div>
+          </div>
+          <div class="sim-kpi">
+            <div class="sim-kpi-val" style="color:var(--ink-mid)">3</div>
+            <div class="sim-kpi-lbl">Ativações</div>
+          </div>
+          <div class="sim-kpi">
+            <div class="sim-kpi-val" style="color:var(--ink-mid)">Ouro</div>
+            <div class="sim-kpi-lbl">Nível</div>
+          </div>
+        </div>
+        <div class="sim-card">
+          <h3 id="sim-welcome">Olá, João! 👋</h3>
+          <p>Bem-vindo ao Clube TCL SEMP 2026. Seus pontos acumulados podem ser trocados por prêmios incríveis. Precisa de ajuda? A TICIELLE está aqui!</p>
+        </div>
+        <div class="sim-card">
+          <h3>Próxima meta</h3>
+          <p>Faltam <strong style="color:var(--red)">253 pontos</strong> para alcançar o nível Diamante e desbloquear prêmios exclusivos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Chatwoot Widget CSS Injection (dinâmico) ── -->
+<style id="widget-override-css"></style>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────
+  let segmento = 'semp';
+  let widgetCarregado = false;
+
+  const SEGMENTOS = {
+    semp: {
+      cor:       '#E30613',
+      corHover:  '#B30000',
+      corGlow:   'rgba(227,6,19,.35)',
+      nome:      'Clube TCL SEMP',
+      topbarCls: 'semp',
+      kpiCls:    'red',
+    },
+    pro: {
+      cor:       '#1A6FA8',
+      corHover:  '#0D1B2A',
+      corGlow:   'rgba(26,111,168,.35)',
+      nome:      'Clube TCL PRO',
+      topbarCls: 'pro',
+      kpiCls:    'blue',
+    },
+  };
+
+  // ── Segmento ───────────────────────────────────────────────────────
+  function setSegmento(seg) {
+    segmento = seg;
+    const btnSemp = document.getElementById('btn-semp');
+    const btnPro  = document.getElementById('btn-pro');
+    btnSemp.className = 'seg-btn' + (seg === 'semp' ? ' active-semp' : '');
+    btnPro.className  = 'seg-btn' + (seg === 'pro'  ? ' active-pro'  : '');
+    if (widgetCarregado) resetarWidget();
+  }
+
+  // ── Status ─────────────────────────────────────────────────────────
+  function setStatus(tipo, msg) {
+    const box  = document.getElementById('status-box');
+    const dot  = document.getElementById('status-dot');
+    const text = document.getElementById('status-text');
+    box.className  = `status status-${tipo}`;
+    dot.className  = `status-dot dot-${tipo}`;
+    text.textContent = msg;
+    // Live indicator no header
+    const liveDot = document.getElementById('live-dot');
+    const liveLabel = document.getElementById('live-label');
+    if (tipo === 'ok') {
+      liveDot.style.background = '#2E7D32';
+      liveLabel.textContent = 'online';
+      liveLabel.style.color = '#2E7D32';
+    } else if (tipo === 'error') {
+      liveDot.style.background = '#E30613';
+      liveLabel.textContent = 'erro';
+      liveLabel.style.color = '#E30613';
+    } else if (tipo === 'loading') {
+      liveDot.style.background = '#E65100';
+      liveLabel.textContent = 'carregando...';
+      liveLabel.style.color = '#E65100';
+    } else {
+      liveDot.style.background = '#ccc';
+      liveLabel.textContent = 'offline';
+      liveLabel.style.color = 'var(--ink-soft)';
+    }
+  }
+
+  // ── Carregar Widget ─────────────────────────────────────────────────
+  function carregarWidget() {
+    const token = document.getElementById('token-input').value.trim();
+    if (!token) {
+      setStatus('error', 'Token não informado. Cole o Website Token do seu inbox.');
+      return;
+    }
+
+    const seg = SEGMENTOS[segmento];
+    const nome  = document.getElementById('user-name').value.trim() || 'Participante Teste';
+    const email = document.getElementById('user-email').value.trim() || 'teste@exemplo.com';
+
+    setStatus('loading', 'Carregando widget...');
+    document.getElementById('btn-load').disabled = true;
+
+    // CSS override para cores TCL
+    document.getElementById('widget-override-css').textContent = `
+      :root { --widget-color: ${seg.cor}; --widget-color-hover: ${seg.corHover}; }
+      .woot-widget-bubble { background-color: ${seg.cor} !important; box-shadow: 0 6px 20px ${seg.corGlow} !important; }
+      .woot-widget-bubble:hover { background-color: ${seg.corHover} !important; }
+      .woot-widget-holder { border-radius: 20px !important; box-shadow: 0 12px 48px rgba(0,0,0,.2) !important; }
+    `;
+
+    // Chatwoot settings
+    window.chatwootSettings = {
+      hideMessageBubble: false,
+      position: 'right',
+      locale: 'pt_BR',
+      type: 'standard',
+      darkMode: 'auto',
+      launcherTitle: segmento === 'semp'
+        ? 'Fale com a TICIELLE ⭐'
+        : 'Fale com a TICIELLE 🔧',
+    };
+
+    // Injetar script SDK
+    const existingScript = document.getElementById('chatwoot-sdk');
+    if (existingScript) existingScript.remove();
+
+    const script = document.createElement('script');
+    script.id = 'chatwoot-sdk';
+    script.src = 'https://app.chatwoot.com/packs/js/sdk.js';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      window.chatwootSDK.run({
+        websiteToken: token,
+        baseUrl: 'https://app.chatwoot.com',
+      });
+    };
+    script.onerror = () => {
+      setStatus('error', 'Falha ao carregar SDK. Verifique conexão com internet.');
+      document.getElementById('btn-load').disabled = false;
+    };
+    document.head.appendChild(script);
+
+    // Aguardar evento de pronto
+    window.addEventListener('chatwoot:ready', function onReady() {
+      window.removeEventListener('chatwoot:ready', onReady);
+
+      // Identificar usuário de teste
+      if (window.$chatwoot) {
+        window.$chatwoot.setUser(`test_${Date.now()}`, {
+          name: nome,
+          email: email,
+        });
+        window.$chatwoot.setCustomAttributes({
+          segmento: segmento,
+          programa: seg.nome,
+          fonte: 'test-widget',
+        });
+        window.$chatwoot.setLabel(segmento);
+      }
+
+      setStatus('ok', `Widget carregado! Usuário: ${nome}`);
+      widgetCarregado = true;
+
+      // Mostrar preview simulado
+      document.getElementById('preview-empty').style.display = 'none';
+      document.getElementById('sim-page').style.display = 'flex';
+      document.getElementById('btn-toggle-chat').style.display = 'inline-flex';
+
+      // Atualizar visual da simulação pelo segmento
+      const topbar = document.getElementById('sim-topbar');
+      topbar.className = `sim-topbar ${seg.topbarCls}`;
+      document.getElementById('sim-prog-name').textContent = seg.nome;
+      document.getElementById('sim-welcome').textContent = `Olá, ${nome.split(' ')[0]}! 👋`;
+
+      const kpiVals = document.querySelectorAll('.sim-kpi-val');
+      if (kpiVals[0]) kpiVals[0].style.color = seg.cor;
+    });
+  }
+
+  // ── Toggle Chat ─────────────────────────────────────────────────────
+  function toggleChat() {
+    if (window.$chatwoot) window.$chatwoot.toggle();
+  }
+
+  // ── Reset ──────────────────────────────────────────────────────────
+  function resetarWidget() {
+    if (window.$chatwoot) window.$chatwoot.reset();
+    const script = document.getElementById('chatwoot-sdk');
+    if (script) script.remove();
+    document.getElementById('widget-override-css').textContent = '';
+    document.getElementById('preview-empty').style.display = 'flex';
+    document.getElementById('sim-page').style.display = 'none';
+    document.getElementById('btn-toggle-chat').style.display = 'none';
+    document.getElementById('btn-load').disabled = false;
+    widgetCarregado = false;
+    setStatus('idle', 'Aguardando token...');
+    // Remove widget DOM injected by Chatwoot
+    document.querySelectorAll('[class^="woot-"], #chatwoot-widget-holder, #cw-widget-holder, .chatwoot-widget-holder').forEach(el => el.remove());
+  }
+
+  // ── Ler token da URL (?token=xxx) ──────────────────────────────────
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get('token');
+    const s = params.get('seg');
+    if (t) document.getElementById('token-input').value = t;
+    if (s && (s === 'semp' || s === 'pro')) setSegmento(s);
+  })();
+</script>
+
+</body>
+</html>
