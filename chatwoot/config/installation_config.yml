@@ -1,0 +1,46 @@
+# ══════════════════════════════════════════════════════════════════════
+# Installation Config Override — Clube TCL SEMP 2026 · Agência YBY
+#
+# Este arquivo substitui o config/installation_config.yml do Chatwoot.
+# Copie para: <chatwoot_root>/config/installation_config.yml
+# ══════════════════════════════════════════════════════════════════════
+
+# ── Nome da instalação ───────────────────────────────────────────────
+# Aparece no dashboard, títulos de página e notificações
+INSTALLATION_NAME: "Clube TCL SEMP"
+
+# ── Logos ────────────────────────────────────────────────────────────
+# SVGs devem estar em public/brand-assets/
+LOGO: "/brand-assets/logo-tcl-semp.svg"
+LOGO_DARK: "/brand-assets/logo-tcl-semp-dark.svg"
+LOGO_THUMBNAIL: "/brand-assets/favicon.svg"
+
+# ── Branding ─────────────────────────────────────────────────────────
+# BRAND_NAME aparece em e-mails e mensagens do sistema
+BRAND_NAME: "Clube TCL SEMP"
+
+# BRAND_URL é o link "Powered by" nos e-mails
+# Vazio remove o link completamente
+BRAND_URL: ""
+
+# WIDGET_BRAND_URL é o link "Powered by" no widget de chat
+# Vazio remove o badge "Powered by Chatwoot" do widget
+WIDGET_BRAND_URL: ""
+
+# ── Links legais ─────────────────────────────────────────────────────
+TERMS_URL: "https://clubetclsemp.com.br/regulamento"
+PRIVACY_URL: "https://clubetclsemp.com.br/privacidade"
+
+# ── Metadados ────────────────────────────────────────────────────────
+# false remove informações do Chatwoot dos headers HTTP
+INSTALLATION_DISPLAY_METADATA: false
+
+# ── Mailer ───────────────────────────────────────────────────────────
+MAILER_SENDER_EMAIL: "suporte@clubetclsemp.com.br"
+MAILER_SUPPORT_EMAIL: "suporte@ybyagencia.com.br"
+
+# ── API ──────────────────────────────────────────────────────────────
+API_MAX_PAGE_SIZE: 100
+
+# ── Locale padrão ────────────────────────────────────────────────────
+DEFAULT_LOCALE: "pt_BR"

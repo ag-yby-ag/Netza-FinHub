@@ -1,0 +1,113 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Fontes — Clube TCL SEMP 2026 · Agência YBY
+   Google Sans: Display · Text · Mono
+   ══════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;500;700&family=Google+Sans+Mono:wght@400;700&family=Google+Sans+Text:wght@400;500;700&display=swap');
+
+/* ── Font Families ───────────────────────────────────────────────────── */
+:root {
+  --font-sans:     'Google Sans', 'Google Sans Text', 'Product Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display:  'Google Sans Display', 'Google Sans', 'Product Sans', sans-serif;
+  --font-mono:     'Google Sans Mono', 'Roboto Mono', 'Fira Code', monospace;
+}
+
+/* ── Override Chatwoot default fonts ─────────────────────────────────── */
+body,
+.app-wrapper,
+.conversation--details,
+.conversation-panel,
+.sidebar,
+.header,
+.message-text-wrap,
+.reply-box,
+.contact-panel,
+.settings-container,
+.login-page {
+  font-family: var(--font-sans) !important;
+}
+
+/* Headlines e títulos */
+h1, h2, h3,
+.page-title,
+.section-title,
+.conversation-header--details,
+.account-selector--name {
+  font-family: var(--font-display) !important;
+  letter-spacing: -0.02em;
+}
+
+/* Dados, KPIs, código */
+code, pre, kbd,
+.message-meta,
+.conversation-id,
+.contact-info--row .value,
+.stats-block .stats-count {
+  font-family: var(--font-mono) !important;
+}
+
+/* ── Escala Tipográfica TCL ──────────────────────────────────────────── */
+/* Display 1 — Hero */
+.t-d1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
+
+/* Display 2 — Section Title */
+.t-d2 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
+}
+
+/* H1 — Page Title */
+.t-h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+/* H2 — Card Title */
+.t-h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* H3 — Subsection */
+.t-h3 {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Body */
+.t-body {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+/* Small / Helper */
+.t-sm {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+/* Label / Tag */
+.t-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Mono — Dados */
+.t-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}

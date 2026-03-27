@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Favicon — Clube TCL SEMP 512x512 -->
+  <!-- Substituir pelo favicon oficial quando disponível -->
+  <rect width="512" height="512" rx="96" fill="#E30613"/>
+  <text x="256" y="200" text-anchor="middle" font-family="Google Sans Display, sans-serif" font-size="120" font-weight="700" fill="#FFFFFF">TCL</text>
+  <text x="256" y="320" text-anchor="middle" font-family="Google Sans, sans-serif" font-size="72" font-weight="700" fill="rgba(255,255,255,0.8)">SEMP</text>
+  <rect x="156" y="360" width="200" height="4" rx="2" fill="rgba(255,255,255,0.3)"/>
+  <text x="256" y="410" text-anchor="middle" font-family="Google Sans, sans-serif" font-size="40" font-weight="500" fill="rgba(255,255,255,0.6)">CLUBE</text>
+</svg>

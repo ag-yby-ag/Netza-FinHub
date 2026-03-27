@@ -1,0 +1,109 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CSS Variables — Clube TCL SEMP 2026 · Agência YBY
+   Sistema cromático completo para white-label do Chatwoot
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── TCL Primary ───────────────────────────────────────────────────── */
+  --tcl-red:          #E30613;
+  --tcl-red-dark:     #B30000;
+  --tcl-red-light:    #FF2A35;
+  --tcl-red-muted:    #FFF0F0;
+
+  /* ── Neutros ───────────────────────────────────────────────────────── */
+  --tcl-black:        #0A0A0A;
+  --tcl-ink:          #1A1A1A;
+  --tcl-ink-mid:      #3D3D3D;
+  --tcl-ink-soft:     #6B6B6B;
+  --tcl-border:       #EBEBEB;
+  --tcl-surface:      #F7F7F7;
+  --tcl-white:        #FFFFFF;
+
+  /* ── Segmento PRO ──────────────────────────────────────────────────── */
+  --tcl-pro-dark:     #0D1B2A;
+  --tcl-pro-accent:   #1A6FA8;
+  --tcl-pro-light:    #E8F4FD;
+
+  /* ── Semânticas ────────────────────────────────────────────────────── */
+  --tcl-success:      #2E7D32;
+  --tcl-success-bg:   #E8F5E9;
+  --tcl-warning:      #E65100;
+  --tcl-warning-bg:   #FFF8E1;
+  --tcl-error:        #E30613;
+  --tcl-error-bg:     #FFF0F0;
+  --tcl-info:         #1A6FA8;
+  --tcl-info-bg:      #E8F4FD;
+
+  /* ── Shadows ───────────────────────────────────────────────────────── */
+  --tcl-shadow-sm:    0 1px 4px rgba(0, 0, 0, 0.08);
+  --tcl-shadow-md:    0 4px 20px rgba(0, 0, 0, 0.10);
+  --tcl-shadow-lg:    0 12px 48px rgba(0, 0, 0, 0.14);
+
+  /* ── Border Radius ─────────────────────────────────────────────────── */
+  --tcl-radius-sm:    6px;
+  --tcl-radius-md:    12px;
+  --tcl-radius-lg:    20px;
+  --tcl-radius-xl:    32px;
+  --tcl-radius-full:  9999px;
+
+  /* ── Spacing (base 4) ──────────────────────────────────────────────── */
+  --tcl-sp-1:         4px;
+  --tcl-sp-2:         8px;
+  --tcl-sp-3:         12px;
+  --tcl-sp-4:         16px;
+  --tcl-sp-6:         24px;
+  --tcl-sp-8:         32px;
+  --tcl-sp-12:        48px;
+  --tcl-sp-16:        64px;
+
+  /* ══════════════════════════════════════════════════════════════════════
+     Mapeamento para variáveis Chatwoot existentes
+     Sobrescreve o tema padrão do Chatwoot com identidade TCL
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* Chatwoot primary → TCL Red */
+  --w-500:            #E30613;
+  --w-600:            #B30000;
+  --w-400:            #FF2A35;
+  --w-100:            #FFF0F0;
+  --w-50:             #FFF7F7;
+  --w-700:            #990000;
+  --w-800:            #800000;
+  --w-900:            #660000;
+  --w-200:            #FFD6D9;
+  --w-300:            #FF8A91;
+
+  /* Chatwoot secondary → TCL Ink */
+  --s-500:            #1A1A1A;
+  --s-600:            #0A0A0A;
+  --s-400:            #3D3D3D;
+  --s-300:            #6B6B6B;
+  --s-200:            #EBEBEB;
+  --s-100:            #F7F7F7;
+  --s-50:             #FFFFFF;
+  --s-700:            #0A0A0A;
+  --s-800:            #050505;
+  --s-900:            #000000;
+
+  /* Background overrides */
+  --color-background-light: #FFFFFF;
+  --color-background-dark:  #0A0A0A;
+  --color-surface:          #F7F7F7;
+  --color-border:           #EBEBEB;
+}
+
+/* ── Dark Mode ───────────────────────────────────────────────────────── */
+.dark,
+[data-theme="dark"] {
+  --tcl-surface:      #0A0A0A;
+  --tcl-white:        #1A1A1A;
+  --tcl-ink:          #F7F7F7;
+  --tcl-ink-mid:      #EBEBEB;
+  --tcl-ink-soft:     #9E9E9E;
+  --tcl-border:       #2A2A2A;
+
+  --color-background-light: #0A0A0A;
+  --color-background-dark:  #050505;
+  --color-surface:          #1A1A1A;
+  --color-border:           #2A2A2A;
+}

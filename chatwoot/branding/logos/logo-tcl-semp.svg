@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" fill="none">
+  <!-- Clube TCL SEMP — Logo Light Mode -->
+  <!-- Substituir pelo logo oficial TCL SEMP quando disponível -->
+  <rect width="240" height="48" rx="8" fill="#FFFFFF"/>
+  <text x="16" y="20" font-family="Google Sans, sans-serif" font-size="10" font-weight="700" letter-spacing="3" fill="#E30613" text-transform="uppercase">CLUBE</text>
+  <text x="16" y="38" font-family="Google Sans Display, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.5" fill="#1A1A1A">TCL SEMP</text>
+  <rect x="140" y="8" width="3" height="32" rx="1.5" fill="#E30613"/>
+  <text x="152" y="28" font-family="Google Sans, sans-serif" font-size="11" font-weight="500" fill="#6B6B6B">Programa de</text>
+  <text x="152" y="40" font-family="Google Sans, sans-serif" font-size="11" font-weight="700" fill="#1A1A1A">Incentivo</text>
+</svg>
